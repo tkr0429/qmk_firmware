@@ -2,7 +2,6 @@
 #include "keymap_jp.h"
 
 extern keymap_config_t keymap_config;
-
 #define _QWERTY 0
 #define _LOWER 1
 #define _RAISE 2
@@ -14,6 +13,7 @@ enum custom_keycodes {
   LOWER,
   RAISE,
   ADJUST,
+  SYMB,
 };
 
 #define EISU LALT(KC_GRV)
@@ -66,7 +66,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_TRNS, KC_TRNS, KC_MS_U, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_MPLY, KC_JYEN,  \
     KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_TRNS, KC_TRNS, KC_TRNS,                        KC_DEL,  KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, KC_TRNS, KC_TRNS,  \
     KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_POWER,                        KC_TRNS, KC_TRNS, KC__MUTE, KC_MRWD, KC_MFFD, KC_TRNS, KC_TRNS,  \
-    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_APP,          KC_TRNS  ,KC_BTN1,     KC_BTN2, KC_TRNS,          KC_TRNS, KC_TRNS, KC__VOLUP, KC__VOLDOWN, KC_TRNS  \
+    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,          KC_TRNS  ,KC_BTN1,     KC_BTN2, KC_TRNS,          KC_TRNS, KC_TRNS, KC__VOLUP, KC__VOLDOWN, KC_TRNS  \
   ),
 
   /* Lower
@@ -87,7 +87,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_F12,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_LCBR,                        KC_RCBR, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN,  KC_RPRN, KC_PIPE, \
     KC_TAB,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_DEL ,                        KC_BSPC, KC_LEFT, KC_DOWN,   KC_UP, KC_RGHT, KC_COLN, KC_DQT , \
     KC_LSFT, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_SPC ,                        KC_ENT,  KC_N,    KC_M,    KC_LT,   KC_GT,    KC_QUES, KC_RSFT, \
-    KC_LCTL, KC_LGUI, KC_LALT, KC_LGUI,  LOWER,   KC_ESC,  KC_SPC,                        KC_ENT,  KC_RCTL,  RAISE,   KC_HOME, KC_PGUP, KC_PGDN, KC_END   \
+    KC_LCTL, KC_LGUI, KC_LALT, KC_LGUI,  LOWER,   KC_ESC,  KC_SPC,                        KC_ENT,  KC_RCTL, RAISE,   KC_HOME, KC_PGUP, KC_PGDN, KC_END   \
   ),
 
   /* Raise
@@ -142,6 +142,47 @@ void persistent_default_layer_set(uint16_t default_layer) {
   default_layer_set(default_layer);
 }
 
+#include "pro_micro.h"
+void matrix_scan_user(void) {
+  TXLED0;
+  RXLED0;
+}
+
+void matrix_init_user(void) {
+  TXLED0;
+  RXLED0;
+}
+
+/*
+// RGB Underglow使用時のレイヤー毎のカラー切り替え
+uint32_t layer_state_set_keymap (uint32_t state) {
+  return state;
+}
+uint32_t layer_state_set_user(uint32_t state) {
+  state = update_tri_layer_state(state, _RAISE, _LOWER, _ADJUST);
+  uint8_t layer = biton32(state);
+#ifdef RGBLIGHT_ENABLE
+    switch (layer) {
+    case _RAISE:
+      rgblight_mode(1);
+      rgblight_setrgb_chartreuse();
+      break;
+    case _LOWER:
+      rgblight_mode(1);
+      rgblight_setrgb_green();
+      break;
+    case _ADJUST:
+      rgblight_mode(1);
+      rgblight_setrgb_red();
+      break;
+    default: //  for any other layers, or the default layer
+      rgblight_setrgb(0,0,0);
+      break;
+    }
+#endif
+return state;
+}
+*/
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case QWERTY:
@@ -187,9 +228,9 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 {
     switch(id) {
         case UM_EMHL: // タップで「英数」と「無変換」、ホールドで「Lower」
-        return MACRO_TAP_HOLD_LAYER( record, MACRO(T(MHEN), T(LANG2), END), _LOWER );
+            return MACRO_TAP_HOLD_LAYER( record, MACRO(T(MHEN), T(LANG2), END), _LOWER );
         case UM_KHKR: // タップで「かな」と「変換」、ホールドで「Raise」
-        return MACRO_TAP_HOLD_LAYER( record, MACRO(T(HENK), T(LANG1), END), _RAISE );
+            return MACRO_TAP_HOLD_LAYER( record, MACRO(T(HENK), T(LANG1), END), _RAISE );
         };
         return MACRO_NONE;
 }
