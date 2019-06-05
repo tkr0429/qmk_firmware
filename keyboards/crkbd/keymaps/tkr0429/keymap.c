@@ -24,13 +24,17 @@ extern uint8_t is_master;
 #define _QWERTY 0
 #define _LOWER 1
 #define _RAISE 2
-#define _ADJUST 3
+#define _SYMBL 4
+#define _NUMPAD 5
+#define _ADJUST 9
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
   LOWER,
   RAISE,
   ADJUST,
+  SYMBL,
+  NUMPAD,
   BACKLIT,
   RGBRST
 };
@@ -48,6 +52,9 @@ enum user_macro {
 #define KC_XXXXX KC_NO
 #define KC_LOWER LOWER
 #define KC_RAISE RAISE
+#define KC_SYMBL SYMBL
+#define KC_QWERTY QWERTY
+#define KC_NUMPAD NUMPAD
 #define KC_RST   RESET
 #define KC_LRST  RGBRST
 #define KC_LTOG  RGB_TOG
@@ -59,14 +66,14 @@ enum user_macro {
 #define KC_LVAD  RGB_VAD
 #define KC_LMOD  RGB_MOD
 #define KC_CTLTB CTL_T(KC_TAB)
-#define KC_ALTKN ALT_T(KC_LANG1)
+#define KC_ALTESC ALT_T(KC_ESC)
 #define KC_M_EMHL MACROTAP(UM_EMHL)      // 「Lower」キー用のキーコード
 #define KC_M_KHKR MACROTAP(UM_KHKR)      // 「Raise」キー用のキーコード
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT_kc( \
   //,-----------------------------------------.                ,-----------------------------------------.
-        ESC,     Q,     W,     E,     R,     T,                      Y,     U,     I,     O,     P,  BSPC,\
+     ALTESC,     Q,     W,     E,     R,     T,                      Y,     U,     I,     O,     P,  BSPC,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       CTLTB,     A,     S,     D,     F,     G,                      H,     J,     K,     L,  SCLN,  QUOT,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
@@ -96,19 +103,43 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
        LSFT, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                   UNDS,  PLUS,  LBRC,  RBRC,  BSLS,  TILD,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                   LGUI, LOWER,   SPC,      ENT, RAISE, ALTKN \
+                                   LGUI, LOWER,   SPC,      ENT, RAISE,  RALT\
+                              //`--------------------'  `--------------------'
+  ),
+
+  [_SYMBL] = LAYOUT_kc( \
+  //,-----------------------------------------.                ,-----------------------------------------.
+      XXXXX, XXXXX,  MS_U, XXXXX, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
+  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
+      XXXXX,  MS_L,  MS_D,  MS_R, XXXXX, XXXXX,                   LEFT,  DOWN,    UP,  RGHT, XXXXX, XXXXX,\
+  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
+  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
+                                   LGUI, LOWER, BTN1,    BTN2, RAISE, RALT \
+                              //`--------------------'  `--------------------'
+  ),
+
+  [_NUMPAD] = LAYOUT_kc( \
+  //,-----------------------------------------.                ,-----------------------------------------.
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                      7,     8,     9, XXXXX, XXXXX,  BSPC,\
+  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                      4,     5,     6, XXXXX, XXXXX, XXXXX,\
+  //|------+------+------+------+------+------|                |------+------+------+------+------+------|
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                      1,     2,     3,   DOT, XXXXX, XXXXX,\
+  //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
+                                   LGUI, LOWER,   SPC,      ENT, RAISE,     0\
                               //`--------------------'  `--------------------'
   ),
 
   [_ADJUST] = LAYOUT_kc( \
   //,-----------------------------------------.                ,-----------------------------------------.
-        RST,  LRST,  LTOG,  LMOD, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
+        RST,  LRST,  LTOG,  LMOD, XXXXX, XXXXX,                 QWERTY, SYMBL,NUMPAD, XXXXX, XXXXX, XXXXX,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       XXXXX,  LHUI,  LSAI,  LVAI, XXXXX, XXXXX,                   LEFT,  DOWN,    UP,  RGHT, XXXXX, XXXXX,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
        LSFT,  LHUD,  LSAD,  LVAD, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                   LGUI, LOWER,   SPC,      ENT, RAISE, ALTKN \
+                                   LGUI, LOWER,   SPC,      ENT, RAISE, RALT \
                               //`--------------------'  `--------------------'
   )
 };
@@ -121,11 +152,11 @@ void persistent_default_layer_set(uint16_t default_layer) {
 }
 
 // Setting ADJUST layer RGB back to default
-void update_tri_layer_RGB(uint8_t layer1, uint8_t layer2, uint8_t layer3) {
+void update_tri_layer_RGB(uint8_t layer1, uint8_t layer2, uint8_t layer9) {
   if (IS_LAYER_ON(layer1) && IS_LAYER_ON(layer2)) {
-    layer_on(layer3);
+    layer_on(layer9);
   } else {
-    layer_off(layer3);
+    layer_off(layer9);
   }
 }
 
@@ -199,6 +230,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case QWERTY:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+      break;
+    case SYMBL:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_SYMBL);
+      }
+      return false;
+      break;
+    case NUMPAD:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_NUMPAD);
       }
       return false;
       break;
