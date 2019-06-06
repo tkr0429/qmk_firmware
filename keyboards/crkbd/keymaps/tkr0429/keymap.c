@@ -41,9 +41,7 @@ enum custom_keycodes {
 
 enum macro_keycodes {
   KC_SAMPLEMACRO,
-};
-
-enum user_macro {
+  KC_BSDEL,
   UM_EMHL,
   UM_KHKR
 };
@@ -73,7 +71,7 @@ enum user_macro {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT_kc( \
   //,-----------------------------------------.                ,-----------------------------------------.
-     ALTESC,     Q,     W,     E,     R,     T,                      Y,     U,     I,     O,     P,  BSPC,\
+     ALTESC,     Q,     W,     E,     R,     T,                      Y,     U,     I,     O,     P, BSDEL,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       CTLTB,     A,     S,     D,     F,     G,                      H,     J,     K,     L,  SCLN,  QUOT,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
@@ -109,13 +107,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_SYMBL] = LAYOUT_kc( \
   //,-----------------------------------------.                ,-----------------------------------------.
-      XXXXX, XXXXX,  MS_U, XXXXX, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      XXXXX,  MS_L,  MS_D,  MS_R, XXXXX, XXXXX,                   LEFT,  DOWN,    UP,  RGHT, XXXXX, XXXXX,\
+      XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                   LEFT,  DOWN,    UP,  RGHT, XXXXX, XXXXX,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                   LGUI, LOWER, BTN1,    BTN2, RAISE, RALT \
+                                   LGUI, LOWER,   SPC,      ENT, RAISE, RALT \
                               //`--------------------'  `--------------------'
   ),
 
@@ -145,6 +143,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 int RGB_current_mode;
+static bool m_shift_status = false;
+static bool m_bsdel_was_shifted = false;
 
 void persistent_default_layer_set(uint16_t default_layer) {
   eeconfig_update_default_layer(default_layer);
@@ -219,14 +219,40 @@ void iota_gfx_task_user(void) {
 #endif//SSD1306OLED
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
+    if (record->event.pressed) {
 #ifdef SSD1306OLED
-    set_keylog(keycode, record);
+        set_keylog(keycode, record);
 #endif
-    // set_timelog();
-  }
+        // set_timelog();
+    }
 
   switch (keycode) {
+    // Send Backspace or Delete if shifted
+    case KC_BSDEL:
+      if (record->event.pressed) {
+          if (keyboard_report->mods & MOD_BIT(KC_LSFT)) {
+              m_bsdel_was_shifted = true;
+              unregister_code(KC_LSFT);
+              register_code(KC_DEL);
+          }
+          else {
+              m_bsdel_was_shifted = false;
+              register_code(KC_BSPACE);
+          }
+      }
+      else {
+          if (m_bsdel_was_shifted) {
+              unregister_code(KC_DEL);
+              if (m_shift_status) {
+                  register_code(KC_LSFT);
+              }
+          }
+          else {
+              unregister_code(KC_BSPACE);
+          }
+      }
+      return false;
+      break;
     case QWERTY:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_QWERTY);
@@ -283,6 +309,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       #endif
       return false;
       break;
+
     case RGBRST:
       #ifdef RGBLIGHT_ENABLE
         if (record->event.pressed) {
