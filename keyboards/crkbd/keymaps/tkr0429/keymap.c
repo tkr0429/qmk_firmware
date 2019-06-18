@@ -26,7 +26,7 @@ extern uint8_t is_master;
 #define _RAISE 2
 #define _SYMBL 4
 #define _NUMPAD 5
-#define _ADJUST 9
+#define _ADJUST 6
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
@@ -36,12 +36,13 @@ enum custom_keycodes {
   SYMBL,
   NUMPAD,
   BACKLIT,
-  RGBRST
+  RGBRST,
+  KC_M_SFT,
+  KC_BSDEL
 };
 
 enum macro_keycodes {
   KC_SAMPLEMACRO,
-  KC_BSDEL,
   UM_EMHL,
   UM_KHKR
 };
@@ -63,6 +64,8 @@ enum macro_keycodes {
 #define KC_LVAI  RGB_VAI
 #define KC_LVAD  RGB_VAD
 #define KC_LMOD  RGB_MOD
+#define KC_PTSC  LGUI(S(KC_3)) 
+#define KC_PSCA  LGUI(S(KC_4)) 
 #define KC_CTLTB CTL_T(KC_TAB)
 #define KC_ALTESC ALT_T(KC_ESC)
 #define KC_M_EMHL MACROTAP(UM_EMHL)      // 「Lower」キー用のキーコード
@@ -75,7 +78,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       CTLTB,     A,     S,     D,     F,     G,                      H,     J,     K,     L,  SCLN,  QUOT,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-       LSFT,     Z,     X,     C,     V,     B,                      N,     M,  COMM,   DOT,  SLSH, GRAVE,\
+      M_SFT,    Z,     X,     C,     V,     B,                      N,     M,  COMM,   DOT,  SLSH, GRAVE,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
                                    LGUI, M_EMHL,  SPC,      ENT, M_KHKR, RALT \
                               //`--------------------'  `--------------------'
@@ -97,7 +100,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------.                ,-----------------------------------------.
        TILD,  EXLM,    AT,  HASH,   DLR,  PERC,                   CIRC,  AMPR,  ASTR,  LPRN,  RPRN,  BSPC,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-      CTLTB, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                   MINS,   EQL,  LCBR,  RCBR,  PIPE,   GRV,\
+      CTLTB, XXXXX, XXXXX,  PTSC,  PSCA, XXXXX,                   MINS,   EQL,  LCBR,  RCBR,  PIPE,   GRV,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
        LSFT, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                   UNDS,  PLUS,  LBRC,  RBRC,  BSLS,  TILD,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
@@ -125,7 +128,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,                      1,     2,     3,   DOT, XXXXX, XXXXX,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
-                                   LGUI, LOWER,   SPC,      ENT, RAISE,     0\
+                                   LGUI, LOWER,  SPC,      ENT,  RAISE,    0 \
                               //`--------------------'  `--------------------'
   ),
 
@@ -135,7 +138,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
       XXXXX,  LHUI,  LSAI,  LVAI, XXXXX, XXXXX,                   LEFT,  DOWN,    UP,  RGHT, XXXXX, XXXXX,\
   //|------+------+------+------+------+------|                |------+------+------+------+------+------|
-       LSFT,  LHUD,  LSAD,  LVAD, XXXXX, XXXXX,                  XXXXX, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
+       LSFT,  LHUD,  LSAD,  LVAD, XXXXX, XXXXX,                   NLCK, XXXXX, XXXXX, XXXXX, XXXXX, XXXXX,\
   //|------+------+------+------+------+------+------|  |------+------+------+------+------+------+------|
                                    LGUI, LOWER,   SPC,      ENT, RAISE, RALT \
                               //`--------------------'  `--------------------'
@@ -143,8 +146,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 int RGB_current_mode;
-static bool m_shift_status = false;
-static bool m_bsdel_was_shifted = false;
 
 void persistent_default_layer_set(uint16_t default_layer) {
   eeconfig_update_default_layer(default_layer);
@@ -152,11 +153,11 @@ void persistent_default_layer_set(uint16_t default_layer) {
 }
 
 // Setting ADJUST layer RGB back to default
-void update_tri_layer_RGB(uint8_t layer1, uint8_t layer2, uint8_t layer9) {
+void update_tri_layer_RGB(uint8_t layer1, uint8_t layer2, uint8_t layer6) {
   if (IS_LAYER_ON(layer1) && IS_LAYER_ON(layer2)) {
-    layer_on(layer9);
+    layer_on(layer6);
   } else {
-    layer_off(layer9);
+    layer_off(layer6);
   }
 }
 
@@ -218,6 +219,9 @@ void iota_gfx_task_user(void) {
 }
 #endif//SSD1306OLED
 
+static bool m_shift_status = false;
+static bool m_bsdel_was_shifted = false;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
 #ifdef SSD1306OLED
@@ -227,6 +231,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
   switch (keycode) {
+  // Track the actual state of the Shift key
+    case KC_M_SFT:
+      if (record->event.pressed) {
+        m_shift_status = true;
+        register_code(KC_LSFT);
+      }
+      else {
+        m_shift_status = false;
+        unregister_code(KC_LSFT);
+      }
+      return false;
+    
     // Send Backspace or Delete if shifted
     case KC_BSDEL:
       if (record->event.pressed) {
@@ -252,7 +268,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           }
       }
       return false;
-      break;
     case QWERTY:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_QWERTY);
