@@ -1,4 +1,9 @@
-/* This is the c configuration file for the keymap Copyright 2012 Jun Wako <wakojun@gmail.com> Copyright 2015 Jack Humbert 
+/*
+This is the c configuration file for the keymap
+
+Copyright 2012 Jun Wako <wakojun@gmail.com>
+Copyright 2015 Jack Humbert
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
@@ -37,3 +42,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGBLIGHT_HUE_STEP 10
 #define RGBLIGHT_SAT_STEP 17
 #define RGBLIGHT_VAL_STEP 17
+
+#define TRACKPAD_CONNECTOR_VER 2
